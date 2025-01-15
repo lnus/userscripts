@@ -4,7 +4,7 @@
 // @match       https://www.reddit.com/r/LivestreamFail/*
 // @grant       GM_xmlhttpRequest
 // @version     1.0
-// @author      -
+// @author      lnus
 // @description 2025-01-15, 17:37:52, embed arazu mirrors
 // ==/UserScript==
 (function () {

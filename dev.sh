@@ -1,3 +1,2 @@
 #!/bin/bash
-cd "$(dirname "$0")"
-python3 -m http.server 6969
+python3 -m http.server --directory public 8000

@@ -7,10 +7,24 @@
 // @author      lnus
 // @description 2025-01-15, 17:37:52, embed arazu mirrors
 // ==/UserScript==
+
+// TODO: Implement debouncing for the drag/resize events
 (function () {
   "use strict";
 
   const BOT_USERNAME = "LSFSecondaryMirror";
+
+  // URL sanitization
+  function isSafeUrl(url) {
+    try {
+      const parsed = new URL(url);
+      return (
+        parsed.hostname === "arazu.io" || parsed.hostname.endsWith(".arazu.io")
+      );
+    } catch (e) {
+      return false;
+    }
+  }
 
   function findMirrorLink(commentThread) {
     const pinnedComment = commentThread.querySelector(".stickied");
@@ -21,10 +35,10 @@
 
     const mirrorLink = pinnedComment.querySelector('a[href*="arazu.io"]');
     const href = mirrorLink?.href;
-    return href;
+    return isSafeUrl(href) ? href : null;
   }
 
-  function createFloatingPlayer(videoUrl) {
+  function createFloatingPlayer(videoUrl, postTitle = "LSF Mirror") {
     // Create the container
     const player = document.createElement("div");
     player.style.cssText = `
@@ -52,7 +66,7 @@
 		`;
 
     const title = document.createElement("span");
-    title.textContent = "LSF Mirror"; // TODO: Make dynamic using post title
+    title.textContent = postTitle;
 
     const controls = document.createElement("div");
     controls.style.cssText = `
@@ -154,10 +168,17 @@
       video.style.display = video.style.display === "none" ? "block" : "none";
     });
 
+    // Do cleanup, then remove player
     closeBtn.addEventListener("click", () => {
-      player.remove();
+      video.pause();
+      video.src = "";
+      video.load();
+
+      header.removeEventListener("mousedown", dragStart);
       document.removeEventListener("mousemove", drag);
       document.removeEventListener("mouseup", dragEnd);
+
+      player.remove();
     });
 
     return player;
@@ -170,19 +191,30 @@
     const btn = document.createElement("li");
     btn.innerHTML = '<a class="mirror-btn">📺 mirror</a>';
     btn.onclick = async () => {
+      const btnLink = btn.querySelector("a");
+      const originalText = btnLink.textContent;
+      btnLink.textContent = "🔄 loading...";
+
       const postUrl = post.querySelector(".comments")?.href;
-      console.log(postUrl);
-      if (!postUrl) return;
+      const postTitle = post.querySelector(".title")?.textContent;
+      if (!postUrl) {
+        btnLink.textContent =
+          "❌ this error should never happen, reddit updated their site.";
+        return;
+      }
 
-      const response = await fetch(postUrl);
-      const html = await response.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, "text/html");
+      try {
+        const response = await fetch(postUrl);
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
 
-      const mirrorLink = findMirrorLink(doc);
+        const mirrorLink = findMirrorLink(doc);
+        if (!mirrorLink || !isSafeUrl(mirrorLink)) {
+          btnLink.textContent = "❌ invalid mirror URL";
+          return;
+        }
 
-      // TODO: Could probably actually use their API for this /shrug
-      if (mirrorLink) {
         GM_xmlhttpRequest({
           method: "GET",
           url: mirrorLink,
@@ -195,9 +227,18 @@
             );
             const sourceEl = doc.querySelector("source");
             const cdnUrl = sourceEl?.getAttribute("src");
-            if (cdnUrl) createFloatingPlayer(cdnUrl);
+            if (cdnUrl) createFloatingPlayer(cdnUrl, postTitle);
           },
         });
+      } catch (e) {
+        console.error("Mirror fetch failed:", e);
+        btnLink.textContent = "❌ mirror fetch failed, try again later.";
+      } finally {
+        setTimeout(() => {
+          if (btnLink.textContent.includes("loading")) {
+            btnLink.textContent = originalText;
+          }
+        }, 1000);
       }
     };
 
@@ -207,5 +248,19 @@
   // initial posts
   document.querySelectorAll(".thing.link").forEach(addMirrorButton);
 
-  // TODO: dynamic posts
+  // FIXME: I think this is broken with RES
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.matches?.(".thing.link")) {
+          addMirrorButton(node);
+        }
+      });
+    });
+  });
+
+  observer.observe(document.querySelector("#siteTable") || document.body, {
+    childList: true,
+    subtree: true,
+  });
 })();

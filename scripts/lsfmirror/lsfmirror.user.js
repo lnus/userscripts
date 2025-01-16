@@ -7,12 +7,38 @@
 // @author      lnus
 // @description 2025-01-15, 17:37:52, embed arazu mirrors
 // ==/UserScript==
-
-// TODO: Implement debouncing for the drag/resize events
 (function () {
   "use strict";
 
   const BOT_USERNAME = "LSFSecondaryMirror";
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY = 1000;
+
+  async function fetchWithRetry(url, retries = MAX_RETRIES) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return response;
+    } catch (error) {
+      if (retries > 0) {
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        return fetchWithRetry(url, retries - 1);
+      }
+      throw error;
+    }
+  }
+
+  function throttleRAF(func) {
+    let rafId = null;
+    return function (...args) {
+      if (rafId) return; // Skip if frame is already scheduled
+
+      rafId = requestAnimationFrame(() => {
+        func.apply(this, args);
+        rafId = null;
+      });
+    };
+  }
 
   // URL sanitization
   function isSafeUrl(url) {
@@ -157,7 +183,7 @@ cursor: se-resize;
       }
     }
 
-    function drag(e) {
+    const drag = throttleRAF((e) => {
       if (!dragState.isDragging && !dragState.isResizing) return;
 
       e.preventDefault();
@@ -171,20 +197,24 @@ cursor: se-resize;
 
         // Bound the dragging to window dimensions
         const rect = player.getBoundingClientRect();
-        const maxX = window.innerWidth - rect.width;
-        const maxY = window.innerHeight - rect.height;
+        const initialLeft = parseInt(player.style.left) || 20;  // Get initial CSS left value
+        const initialTop = parseInt(player.style.top) || 20;    // Get initial CSS top value
 
-        dragState.currentX = Math.max(0, Math.min(dragState.currentX, maxX));
-        dragState.currentY = Math.max(0, Math.min(dragState.currentY, maxY));
+        const maxX = window.innerWidth - rect.width - initialLeft;
+        const maxY = window.innerHeight - rect.height - initialTop;
+
+        dragState.currentX = Math.max(-initialLeft, Math.min(dragState.currentX, maxX));
+        dragState.currentY = Math.max(-initialTop, Math.min(dragState.currentY, maxY));
 
         player.style.transform = `translate(${dragState.currentX}px, ${dragState.currentY}px)`;
       }
 
       if (dragState.isResizing) {
-        const width = Math.max(200, e.clientX - player.getBoundingClientRect().left);
+        const maxWidth = window.innerWidth - player.getBoundingClientRect().left;
+        const width = Math.min(maxWidth, Math.max(200, e.clientX - player.getBoundingClientRect().left));
         player.style.width = `${width}px`;
       }
-    }
+    });
 
     // FIXME: This is getting eaten by the video player
     // Mostly an issue when rescaling the video.
@@ -225,7 +255,7 @@ cursor: se-resize;
     closeBtn.addEventListener("click", () => {
       // Cleanup
       video.pause();
-      video.src = "";
+      video.removeAttribute('src');
       video.load();
 
       // Silence the listening
@@ -254,44 +284,48 @@ cursor: se-resize;
       const originalText = btnLink.textContent;
       btnLink.textContent = "🔄 loading...";
 
-      const postUrl = post.querySelector(".comments")?.href;
       const postTitle = post.querySelector(".title")?.textContent;
-      if (!postUrl) {
-        btnLink.textContent =
-          "❌ this error should never happen, reddit updated their site.";
-        return;
-      }
 
       try {
-        const response = await fetch(postUrl);
+        const postUrl = post.querySelector(".comments")?.href;
+        if (!postUrl) throw new Error("Could not find post URL");
+
+        const response = await fetchWithRetry(postUrl);
         const html = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
+        const doc = new DOMParser().parseFromString(html, "text/html");
 
         const mirrorLink = findMirrorLink(doc);
         if (!mirrorLink || !isSafeUrl(mirrorLink)) {
-          btnLink.textContent = "❌ invalid mirror URL";
-          return;
+          throw new Error("Invalid or missing mirror URL");
         }
 
-        GM_xmlhttpRequest({
-          method: "GET",
-          url: mirrorLink,
-
-          onload: function (response) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(
-              response.responseText,
-              "text/html"
-            );
-            const sourceEl = doc.querySelector("source");
-            const cdnUrl = sourceEl?.getAttribute("src");
-            if (cdnUrl) createFloatingPlayer(cdnUrl, postTitle);
-          },
-        });
+        await new Promise((resolve, reject) => {
+          GM_xmlhttpRequest({
+            method: "GET",
+            url: mirrorLink,
+            timeout: 10000,
+            onload: (response) => {
+              try {
+                const doc = new DOMParser().parseFromString(
+                  response.responseText,
+                  "text/html"
+                );
+                const sourceEl = doc.querySelector("source");
+                const cdnUrl = sourceEl?.getAttribute("src");
+                if (!cdnUrl) throw new Error("Could not find video source");
+                createFloatingPlayer(cdnUrl, postTitle);
+                resolve();
+              } catch (e) {
+                reject(e)
+              }
+            },
+            onerror: reject,
+            ontimeout: () => reject(new Error("Request timed out"))
+          });
+        })
       } catch (e) {
         console.error("Mirror fetch failed:", e);
-        btnLink.textContent = "❌ mirror fetch failed, try again later.";
+        btnLink.textContent = `❌ ${e.message || "Failed to load mirror"}`;
       } finally {
         setTimeout(() => {
           if (btnLink.textContent.includes("loading")) {
@@ -307,20 +341,24 @@ cursor: se-resize;
   // initial posts
   document.querySelectorAll(".thing.link").forEach(addMirrorButton);
 
-  // FIXME: I think this is broken with RES
-  // Not quite sure how to fix
+  const observeTarget = document.body; // TODO: kinda hacky
+
   const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      mutation.addedNodes.forEach((node) => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
         if (node.matches?.(".thing.link")) {
           addMirrorButton(node);
         }
-      });
-    });
+        // Check children but avoid re-scanning the entire tree
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          node.querySelectorAll(".thing.link:not(:has(.mirror-btn))").forEach(addMirrorButton);
+        }
+      }
+    }
   });
 
-  observer.observe(document.querySelector("#siteTable") || document.body, {
+  observer.observe(observeTarget, {
     childList: true,
-    subtree: true,
+    subtree: true
   });
 })();

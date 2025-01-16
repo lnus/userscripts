@@ -39,40 +39,55 @@
   }
 
   function createFloatingPlayer(videoUrl, postTitle = "LSF Mirror") {
+    // Inject CSS for drag prevention
+    const style = document.createElement('style');
+    style.textContent = `
+.lsf-player-dragging * {
+user-select: none !important;
+-webkit-user-select: none !important;
+}
+`;
+    document.head.appendChild(style);
+
     // Create the container
     const player = document.createElement("div");
     player.style.cssText = `
-			position: fixed;
-			width: 320px;
-			min-width: 200px;
-			background: #000;
-			border: 2px solid #333;
-			border-radius: 4px;
-			z-index: 999999;
-			top: 20px;
-			left: 20px;
-		`;
+position: fixed;
+width: 320px;
+min-width: 200px;
+background: #000;
+border: 2px solid #333;
+border-radius: 4px;
+z-index: 999999;
+top: 20px;
+left: 20px;
+user-select: none;
+-webkit-user-select: none;
+`;
 
     // Create header for the player
     const header = document.createElement("div");
     header.style.cssText = `
-			background: #333;
-			padding: 8px;
-			cursor: move;
-			color: white;
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-		`;
+background: #333;
+padding: 8px;
+cursor: move;
+color: white;
+display: flex;
+justify-content: space-between;
+align-items: center;
+`;
 
     const title = document.createElement("span");
+    title.style.cssText = `
+pointer-events: none;
+`
     title.textContent = postTitle;
 
     const controls = document.createElement("div");
     controls.style.cssText = `
-			display: flex;
-			gap: 8px;
-		`;
+display: flex;
+gap: 8px;
+`;
 
     // Buttons
     const minimizeBtn = document.createElement("button");
@@ -83,23 +98,23 @@
     // Create video element
     const video = document.createElement("video");
     video.style.cssText = `
-			width: 100%;
-			display: block;
-    `;
+width: 100%;
+display: block;
+`;
     video.controls = true;
     video.src = videoUrl;
 
     // Create resize handle
     const resizeHandle = document.createElement("div");
     resizeHandle.style.cssText = `
-        position: absolute;
-        width: 10px;
-        height: 10px;
-        background: #666;
-        right: 0;
-        bottom: 0;
-        cursor: se-resize;
-    `;
+position: absolute;
+width: 10px;
+height: 10px;
+background: #666;
+right: 0;
+bottom: 0;
+cursor: se-resize;
+`;
 
     // Some assembly required, IKEA mode
     controls.append(minimizeBtn);
@@ -113,72 +128,115 @@
     // Add to document
     document.body.appendChild(player);
 
-    // Dragging functionality
-    let isDragging = false;
-    let isResizing = false;
-    let currentX;
-    let currentY;
-    let initialX;
-    let initialY;
-    let xOffset = 20;
-    let yOffset = 20;
+    // Dragging state
+    let dragState = {
+      isDragging: false,
+      isResizing: false,
+      currentX: 20,
+      currentY: 20,
+      initialX: 0,
+      initialY: 0,
+      xOffset: 20,
+      yOffset: 20,
+      startTime: 0
+    }
 
     function dragStart(e) {
-      initialX = e.clientX - xOffset;
-      initialY = e.clientY - yOffset;
+      if (e.target === header && e.buttons === 1) {
+        e.preventDefault();
+        e.stopPropagation();
 
-      if (e.target === header) {
-        isDragging = true;
+        dragState.isDragging = true;
+        dragState.startTime = Date.now();
+        dragState.initialX = e.clientX - dragState.xOffset;
+        dragState.initialY = e.clientY - dragState.yOffset;
+
+        // Class for global text disable
+        document.documentElement.classList.add("lsf-player-dragging");
+        player.style.cursor = 'grabbing';
       }
     }
 
     function drag(e) {
-      if (isDragging) {
-        e.preventDefault();
-        currentX = e.clientX - initialX;
-        currentY = e.clientY - initialY;
-        xOffset = currentX;
-        yOffset = currentY;
-        player.style.transform = `translate(${currentX}px, ${currentY}px)`;
+      if (!dragState.isDragging && !dragState.isResizing) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (dragState.isDragging) {
+        dragState.currentX = e.clientX - dragState.initialX;
+        dragState.currentY = e.clientY - dragState.initialY;
+        dragState.xOffset = dragState.currentX;
+        dragState.yOffset = dragState.currentY;
+
+        // Bound the dragging to window dimensions
+        const rect = player.getBoundingClientRect();
+        const maxX = window.innerWidth - rect.width;
+        const maxY = window.innerHeight - rect.height;
+
+        dragState.currentX = Math.max(0, Math.min(dragState.currentX, maxX));
+        dragState.currentY = Math.max(0, Math.min(dragState.currentY, maxY));
+
+        player.style.transform = `translate(${dragState.currentX}px, ${dragState.currentY}px)`;
       }
 
-      if (isResizing) {
-        e.preventDefault();
-        const width = e.clientX - player.getBoundingClientRect().left;
+      if (dragState.isResizing) {
+        const width = Math.max(200, e.clientX - player.getBoundingClientRect().left);
         player.style.width = `${width}px`;
       }
     }
 
-    function dragEnd() {
-      initialX = currentX;
-      initialY = currentY;
-      isDragging = false;
-      isResizing = false;
+    // FIXME: This is getting eaten by the video player
+    // Mostly an issue when rescaling the video.
+    // Not really sure how to fix.
+    function dragEnd(e) {
+      if (!dragState.isDragging && !dragState.isResizing) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Reset all states
+      dragState.isDragging = false;
+      dragState.isResizing = false;
+      document.documentElement.classList.remove('lsf-player-dragging');
+      player.style.cursor = '';
+
+      // Only update the offset if we've been dragging for more than 100ms
+      if (Date.now() - dragState.startTime > 100) {
+        dragState.initialX = dragState.currentX;
+        dragState.initialY = dragState.currentY;
+      }
     }
 
-    header.addEventListener("mousedown", dragStart);
-    document.addEventListener("mousemove", drag);
-    document.addEventListener("mouseup", dragEnd);
+    header.addEventListener("mousedown", dragStart, { capture: true, passive: false });
+    document.addEventListener("mousemove", drag, { capture: true, passive: false });
+    document.addEventListener("mouseup", dragEnd, { capture: true, passive: false });
+    window.addEventListener('blur', dragEnd, { capture: true, passive: false });
 
-    resizeHandle.addEventListener("mousedown", () => {
-      isResizing = true;
-    });
+    resizeHandle.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+      dragState.isResizing = true;
+    }, { capture: true, passive: false });
 
     minimizeBtn.addEventListener("click", () => {
       video.style.display = video.style.display === "none" ? "block" : "none";
     });
 
-    // Do cleanup, then remove player
     closeBtn.addEventListener("click", () => {
+      // Cleanup
       video.pause();
       video.src = "";
       video.load();
 
-      header.removeEventListener("mousedown", dragStart);
-      document.removeEventListener("mousemove", drag);
-      document.removeEventListener("mouseup", dragEnd);
+      // Silence the listening
+      header.removeEventListener('mousedown', dragStart, { capture: true });
+      document.removeEventListener('mousemove', drag, { capture: true });
+      document.removeEventListener('mouseup', dragEnd, { capture: true });
+      window.removeEventListener('blur', dragEnd, { capture: true });
 
+      // Remove player and injected style
       player.remove();
+      style.remove();
     });
 
     return player;
@@ -190,6 +248,7 @@
 
     const btn = document.createElement("li");
     btn.innerHTML = '<a class="mirror-btn">📺 mirror</a>';
+    btn.style.cursor = "pointer";
     btn.onclick = async () => {
       const btnLink = btn.querySelector("a");
       const originalText = btnLink.textContent;
@@ -249,6 +308,7 @@
   document.querySelectorAll(".thing.link").forEach(addMirrorButton);
 
   // FIXME: I think this is broken with RES
+  // Not quite sure how to fix
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       mutation.addedNodes.forEach((node) => {

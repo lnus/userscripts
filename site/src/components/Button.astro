@@ -1,0 +1,20 @@
+---
+interface Props {
+  id?: string;
+  class?: string;
+}
+
+const { id, class: className } = Astro.props;
+---
+
+<button
+  id={id}
+  class:list={[
+    "border border-current px-3 py-1 text-xs",
+    "inline-block text-center",
+    "hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black",
+    className,
+  ]}
+>
+  <slot />
+</button>

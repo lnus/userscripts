@@ -1,8 +1,4 @@
-# Userscript repo
-
-TODO:
-
-- [ ] Make the styling not super generic and boring
+# Userscript repo astro SSG
 
 ## 🧞 Commands
 

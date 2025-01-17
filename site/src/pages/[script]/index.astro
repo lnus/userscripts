@@ -1,0 +1,45 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ScriptHeader from "../../components/ScriptHeader.astro";
+import ScriptMeta from "../../components/ScriptMeta.astro";
+import { getAllScripts, getScriptBySlug } from "../../utils/scripts";
+import { marked } from "marked";
+
+export async function getStaticPaths() {
+  const scripts = await getAllScripts();
+  return scripts.map((script) => ({
+    params: { script: script.slug },
+  }));
+}
+
+const { script: slug } = Astro.params;
+const script = await getScriptBySlug(slug!);
+
+if (!script) {
+  return Astro.redirect("/404");
+}
+
+const content = await marked(script.content);
+---
+
+<Layout title={script.slug}>
+  <article class="border-2 border-current">
+    <ScriptHeader
+      title={script.title}
+      version={script.metadata.version}
+      author={script.metadata.author}
+    />
+
+    <div class="p-6">
+      <ScriptMeta
+        slug={script.slug}
+        lastUpdated={script.metadata.lastUpdated}
+      />
+
+      <div
+        class="prose dark:prose-invert max-w-none mb-8 lowercase"
+        set:html={content}
+      />
+    </div>
+  </article>
+</Layout>

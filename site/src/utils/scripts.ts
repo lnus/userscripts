@@ -7,6 +7,7 @@ interface ScriptMetadata {
   version: string;
   description: string;
   author: string;
+  lastUpdated: Date;
 }
 
 export interface Script {
@@ -40,6 +41,7 @@ function parseUserscriptMetadata(content: string): ScriptMetadata {
     version: metadata.version || "0.0.0",
     description: metadata.description || "No description provided",
     author: metadata.author || "Unknown",
+    lastUpdated: new Date(),
   };
 }
 
@@ -69,7 +71,11 @@ export async function getAllScripts(): Promise<Script[]> {
 
         const scriptPath = path.join(folderPath, userscriptFile);
         const scriptContent = await fs.readFile(scriptPath, "utf-8");
-        const metadata = parseUserscriptMetadata(scriptContent);
+        const scriptStat = await fs.stat(scriptPath);
+        const metadata = {
+          ...parseUserscriptMetadata(scriptContent),
+          lastUpdated: scriptStat.mtime,
+        };
 
         return {
           slug: folder,

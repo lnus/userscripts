@@ -1,4 +1,4 @@
-import { getAllScripts, getScriptBySlug } from "../../../utils/scripts";
+import { getAllScripts, getScriptBySlug } from "../../utils/scripts";
 
 export async function getStaticPaths() {
   const scripts = await getAllScripts();

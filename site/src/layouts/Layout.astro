@@ -1,4 +1,6 @@
 ---
+import Button from "../components/Button.astro";
+import LinkButton from "../components/LinkButton.astro";
 interface Props {
   title: string;
 }
@@ -14,33 +16,62 @@ const { title } = Astro.props;
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/IBM-Plex-Mono/2.3.0/fonts/complete/woff/IBMPlexMono-Regular.woff"
+    />
+    <title>{title} | lnus.github.io/userscripts</title>
   </head>
-  <body>
+  <body
+    class="min-h-screen py-6 font-mono transition-colors duration-200 dark:bg-black dark:text-white bg-white text-black"
+  >
     <main class="max-w-4xl mx-auto px-4 py-8">
-      <header class="mb-8">
-        <!-- <h1 class="text-4xl font-bold">{title}</h1> -->
-      </header>
-      <slot />
+      <div class="border-2 border-current p-8">
+        <div class="flex justify-between items-center">
+          <a href="/userscripts">
+            <h1 class="text-4xl lowercase tracking-tight">{title}</h1>
+          </a>
+          <div class="flex items-center space-x-4">
+            <LinkButton href="/userscripts">home</LinkButton>
+            <Button id="theme-toggle">toggle theme</Button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8">
+        <slot />
+      </div>
     </main>
   </body>
 </html>
 
-<style is:global>
-  :root {
-    --accent: 136, 58, 234;
-    --accent-light: 224, 204, 250;
-    --accent-dark: 49, 10, 101;
-    --accent-gradient: linear-gradient(
-      45deg,
-      rgb(var(--accent)),
-      rgb(var(--accent-light)) 30%,
-      white 60%
+<script>
+  const themeToggle = document.getElementById("theme-toggle");
+  const html = document.documentElement;
+
+  const theme = localStorage.getItem("theme") || "dark";
+  html.classList.toggle("dark", theme === "dark");
+
+  themeToggle?.addEventListener("click", () => {
+    html.classList.toggle("dark");
+    localStorage.setItem(
+      "theme",
+      html.classList.contains("dark") ? "dark" : "light"
     );
+  });
+</script>
+
+<style is:global>
+  @font-face {
+    font-family: "IBM Plex Mono";
+    src: url("https://cdnjs.cloudflare.com/ajax/libs/IBM-Plex-Mono/2.3.0/fonts/complete/woff/IBMPlexMono-Regular.woff")
+      format("woff");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
   }
 
-  body {
-    font-family: system-ui, sans-serif;
-    background: #f6f6f6;
+  :root {
+    font-family: "IBM Plex Mono", monospace;
   }
 </style>

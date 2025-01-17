@@ -1,0 +1,21 @@
+---
+interface Props {
+  title: string;
+  version: string;
+  author: string;
+}
+
+const { title, version, author } = Astro.props;
+---
+
+<header class="border-b-2 border-current px-6 py-2">
+  <div class="flex justify-between items-center">
+    <h1 class="text-3xl lowercase tracking-tight">{title}</h1>
+    <div class="text-xs">
+      <span class="border border-current px-2 py-1">v{version}</span>
+    </div>
+  </div>
+
+  <!-- Don't really need author, all of the scripts are by me -->
+  <!-- <div class="text-sm">{author}</div> -->
+</header>

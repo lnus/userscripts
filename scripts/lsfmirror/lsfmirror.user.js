@@ -17,11 +17,12 @@
   async function fetchWithRetry(url, retries = MAX_RETRIES) {
     try {
       const response = await fetch(url);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
       return response;
     } catch (error) {
       if (retries > 0) {
-        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
         return fetchWithRetry(url, retries - 1);
       }
       throw error;
@@ -66,7 +67,7 @@
 
   function createFloatingPlayer(videoUrl, postTitle = "LSF Mirror") {
     // Inject CSS for drag prevention
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
 .lsf-player-dragging * {
 user-select: none !important;
@@ -106,7 +107,7 @@ align-items: center;
     const title = document.createElement("span");
     title.style.cssText = `
 pointer-events: none;
-`
+`;
     title.textContent = postTitle;
 
     const controls = document.createElement("div");
@@ -164,8 +165,8 @@ cursor: se-resize;
       initialY: 0,
       xOffset: 20,
       yOffset: 20,
-      startTime: 0
-    }
+      startTime: 0,
+    };
 
     function dragStart(e) {
       if (e.target === header && e.buttons === 1) {
@@ -179,7 +180,7 @@ cursor: se-resize;
 
         // Class for global text disable
         document.documentElement.classList.add("lsf-player-dragging");
-        player.style.cursor = 'grabbing';
+        player.style.cursor = "grabbing";
       }
     }
 
@@ -197,21 +198,31 @@ cursor: se-resize;
 
         // Bound the dragging to window dimensions
         const rect = player.getBoundingClientRect();
-        const initialLeft = parseInt(player.style.left) || 20;  // Get initial CSS left value
-        const initialTop = parseInt(player.style.top) || 20;    // Get initial CSS top value
+        const initialLeft = parseInt(player.style.left) || 20; // Get initial CSS left value
+        const initialTop = parseInt(player.style.top) || 20; // Get initial CSS top value
 
         const maxX = window.innerWidth - rect.width - initialLeft;
         const maxY = window.innerHeight - rect.height - initialTop;
 
-        dragState.currentX = Math.max(-initialLeft, Math.min(dragState.currentX, maxX));
-        dragState.currentY = Math.max(-initialTop, Math.min(dragState.currentY, maxY));
+        dragState.currentX = Math.max(
+          -initialLeft,
+          Math.min(dragState.currentX, maxX)
+        );
+        dragState.currentY = Math.max(
+          -initialTop,
+          Math.min(dragState.currentY, maxY)
+        );
 
         player.style.transform = `translate(${dragState.currentX}px, ${dragState.currentY}px)`;
       }
 
       if (dragState.isResizing) {
-        const maxWidth = window.innerWidth - player.getBoundingClientRect().left;
-        const width = Math.min(maxWidth, Math.max(200, e.clientX - player.getBoundingClientRect().left));
+        const maxWidth =
+          window.innerWidth - player.getBoundingClientRect().left;
+        const width = Math.min(
+          maxWidth,
+          Math.max(200, e.clientX - player.getBoundingClientRect().left)
+        );
         player.style.width = `${width}px`;
       }
     });
@@ -228,8 +239,8 @@ cursor: se-resize;
       // Reset all states
       dragState.isDragging = false;
       dragState.isResizing = false;
-      document.documentElement.classList.remove('lsf-player-dragging');
-      player.style.cursor = '';
+      document.documentElement.classList.remove("lsf-player-dragging");
+      player.style.cursor = "";
 
       // Only update the offset if we've been dragging for more than 100ms
       if (Date.now() - dragState.startTime > 100) {
@@ -238,15 +249,28 @@ cursor: se-resize;
       }
     }
 
-    header.addEventListener("mousedown", dragStart, { capture: true, passive: false });
-    document.addEventListener("mousemove", drag, { capture: true, passive: false });
-    document.addEventListener("mouseup", dragEnd, { capture: true, passive: false });
-    window.addEventListener('blur', dragEnd, { capture: true, passive: false });
+    header.addEventListener("mousedown", dragStart, {
+      capture: true,
+      passive: false,
+    });
+    document.addEventListener("mousemove", drag, {
+      capture: true,
+      passive: false,
+    });
+    document.addEventListener("mouseup", dragEnd, {
+      capture: true,
+      passive: false,
+    });
+    window.addEventListener("blur", dragEnd, { capture: true, passive: false });
 
-    resizeHandle.addEventListener('mousedown', (e) => {
-      e.stopPropagation();
-      dragState.isResizing = true;
-    }, { capture: true, passive: false });
+    resizeHandle.addEventListener(
+      "mousedown",
+      (e) => {
+        e.stopPropagation();
+        dragState.isResizing = true;
+      },
+      { capture: true, passive: false }
+    );
 
     minimizeBtn.addEventListener("click", () => {
       video.style.display = video.style.display === "none" ? "block" : "none";
@@ -255,14 +279,14 @@ cursor: se-resize;
     closeBtn.addEventListener("click", () => {
       // Cleanup
       video.pause();
-      video.removeAttribute('src');
+      video.removeAttribute("src");
       video.load();
 
       // Silence the listening
-      header.removeEventListener('mousedown', dragStart, { capture: true });
-      document.removeEventListener('mousemove', drag, { capture: true });
-      document.removeEventListener('mouseup', dragEnd, { capture: true });
-      window.removeEventListener('blur', dragEnd, { capture: true });
+      header.removeEventListener("mousedown", dragStart, { capture: true });
+      document.removeEventListener("mousemove", drag, { capture: true });
+      document.removeEventListener("mouseup", dragEnd, { capture: true });
+      window.removeEventListener("blur", dragEnd, { capture: true });
 
       // Remove player and injected style
       player.remove();
@@ -316,13 +340,13 @@ cursor: se-resize;
                 createFloatingPlayer(cdnUrl, postTitle);
                 resolve();
               } catch (e) {
-                reject(e)
+                reject(e);
               }
             },
             onerror: reject,
-            ontimeout: () => reject(new Error("Request timed out"))
+            ontimeout: () => reject(new Error("Request timed out")),
           });
-        })
+        });
       } catch (e) {
         console.error("Mirror fetch failed:", e);
         btnLink.textContent = `❌ ${e.message || "Failed to load mirror"}`;
@@ -351,7 +375,9 @@ cursor: se-resize;
         }
         // Check children but avoid re-scanning the entire tree
         if (node.nodeType === Node.ELEMENT_NODE) {
-          node.querySelectorAll(".thing.link:not(:has(.mirror-btn))").forEach(addMirrorButton);
+          node
+            .querySelectorAll(".thing.link:not(:has(.mirror-btn))")
+            .forEach(addMirrorButton);
         }
       }
     }
@@ -359,6 +385,6 @@ cursor: se-resize;
 
   observer.observe(observeTarget, {
     childList: true,
-    subtree: true
+    subtree: true,
   });
 })();

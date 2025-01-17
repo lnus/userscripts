@@ -1,0 +1,36 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  slug: string;
+  metadata: {
+    name: string;
+    version: string;
+    description: string;
+    author: string;
+  };
+}
+
+const { title, description, slug, metadata } = Astro.props;
+---
+
+<article
+  class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+>
+  <div class="flex justify-between items-start mb-4">
+    <h2 class="text-xl font-bold">{metadata.name}</h2>
+    <span class="text-sm text-gray-500">v{metadata.version}</span>
+  </div>
+
+  <p class="text-gray-600 mb-4">{description}</p>
+
+  <div class="flex justify-between items-center">
+    <span class="text-sm text-gray-500">by {metadata.author}</span>
+    <a
+      href={`/scripts/${slug}`}
+      class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+    >
+      View Details
+    </a>
+  </div>
+</article>

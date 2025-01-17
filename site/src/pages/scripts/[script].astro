@@ -1,0 +1,51 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getAllScripts, getScriptBySlug } from "../../utils/scripts";
+
+export async function getStaticPaths() {
+  const scripts = await getAllScripts();
+  return scripts.map((script) => ({
+    params: { script: script.slug },
+  }));
+}
+
+const { script: slug } = Astro.params;
+const script = await getScriptBySlug(slug!);
+
+if (!script) {
+  return Astro.redirect("/404");
+}
+---
+
+<Layout title={script.title}>
+  <article class="prose prose-lg max-w-none">
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold mb-4">{script.title}</h1>
+      <div class="flex gap-4 text-gray-600">
+        <span>Version {script.metadata.version}</span>
+        <span>by {script.metadata.author}</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <h2 class="text-2xl font-bold mb-4">Description</h2>
+      <div set:html={script.content} />
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold">Source Code</h2>
+        <button
+          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          onclick="navigator.clipboard.writeText(document.querySelector('pre code').textContent)"
+        >
+          Copy Code
+        </button>
+      </div>
+      <pre
+        class="p-4 bg-gray-100 rounded overflow-x-auto">
+        <code>{script.source}</code>
+      </pre>
+    </div>
+  </article>
+</Layout>

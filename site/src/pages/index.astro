@@ -1,0 +1,27 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ScriptCard from "../components/ScriptCard.astro";
+import { getAllScripts } from "../utils/scripts";
+
+const scripts = await getAllScripts();
+---
+
+<Layout title="Userscripts">
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold mb-2">Userscripts</h1>
+    <p class="text-gray-600">A collection of useful browser userscripts</p>
+  </div>
+
+  <div class="grid gap-6 md:grid-cols-2">
+    {
+      scripts.map((script) => (
+        <ScriptCard
+          title={script.title}
+          description={script.description}
+          slug={script.slug}
+          metadata={script.metadata}
+        />
+      ))
+    }
+  </div>
+</Layout>

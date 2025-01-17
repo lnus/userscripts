@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name        LSF Mirror Player
-// @namespace   Violentmonkey Scripts
+// @namespace   lnus.github.io
 // @match       https://www.reddit.com/r/LivestreamFail/*
 // @grant       GM_xmlhttpRequest
-// @version     0.1.0
+// @version     0.1.1
 // @author      lnus
-// @description Embeds arazu mirrors on LSF, makes viewing better
+// @description Embeds Arazu mirrors on LSF, makes viewing better
 // ==/UserScript==
 (function () {
   "use strict";

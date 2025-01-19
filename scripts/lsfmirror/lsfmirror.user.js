@@ -3,9 +3,10 @@
 // @namespace   lnus.github.io
 // @match       https://www.reddit.com/r/LivestreamFail/*
 // @grant       GM_xmlhttpRequest
-// @version     0.1.1
-// @author      lnus
 // @description Embeds Arazu mirrors on LSF, makes viewing better
+// @author      lnus
+// @version     0.1.1
+// @lastModified 2025-01-17
 // ==/UserScript==
 (function () {
   "use strict";

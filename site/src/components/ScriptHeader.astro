@@ -3,18 +3,23 @@ interface Props {
   title: string;
   version: string;
   author: string;
+  description: string;
 }
 
-const { title, version, author } = Astro.props;
+const { title, version, author, description } = Astro.props;
 ---
 
-<header class="border-b-2 border-current px-6 py-2">
+<header>
   <div class="flex justify-between items-center">
     <h1 class="text-3xl lowercase tracking-tight">{title}</h1>
     <div class="text-xs">
       <span class="border border-current px-2 py-1">v{version}</span>
     </div>
   </div>
+
+  <p class="text-sm mb-4 line-clamp-2 text-gray-600 dark:text-gray-300">
+    {description}
+  </p>
 
   <!-- Don't really need author, all of the scripts are by me -->
   <!-- <div class="text-sm">{author}</div> -->

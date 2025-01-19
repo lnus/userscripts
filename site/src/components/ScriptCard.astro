@@ -1,6 +1,9 @@
 ---
 import { marked } from "marked";
 import LinkButton from "./LinkButton.astro";
+import ScriptHeader from "./ScriptHeader.astro";
+import ScriptMeta from "./ScriptMeta.astro";
+
 interface Props {
   title: string;
   description: string;
@@ -21,27 +24,17 @@ const contentHtml = await marked(content);
 ---
 
 <article class="border-2 border-current p-4 transition-colors">
-  <div class="flex justify-between items-start mb-4">
-    <h2 class="text-lg lowercase tracking-tight">{title}</h2>
-    <span class="text-xs border border-current px-2">v{metadata.version}</span>
-  </div>
+  <ScriptHeader
+    title={title}
+    version={metadata.version}
+    author={metadata.author}
+    description={metadata.description}
+  />
 
-  <p class="text-sm mb-4 line-clamp-2 text-gray-600 dark:text-gray-300">
-    {metadata.description}
-  </p>
 
-  <div class="flex justify-between items-end text-xs">
-    <div class="flex flex-col">
-      <!-- Don't really need author, all of the scripts are by me -->
-      <!-- <span>{metadata.author}</span> -->
-      <span>v{metadata.version}</span>
-      <span>last updated: {metadata.lastUpdated.toLocaleDateString()}</span>
-    </div>
-    <div class="space-x-4">
-      <LinkButton href={`/userscripts/${slug}`}>details</LinkButton>
-      <LinkButton href={`/userscripts/${slug}/script.user.js`}
-        >install</LinkButton
-      >
-    </div>
-  </div>
+  <ScriptMeta
+    slug={slug}
+    lastUpdated={metadata.lastUpdated}
+    details=true
+  />
 </article>

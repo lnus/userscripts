@@ -24,21 +24,16 @@ const content = await marked(script.content);
 
 <Layout title={script.slug}>
   <article class="border-2 border-current">
-    <ScriptHeader
-      title={script.title}
-      version={script.metadata.version}
-      author={script.metadata.author}
-    />
-
-    <div class="p-6">
-      <ScriptMeta
-        slug={script.slug}
-        lastUpdated={script.metadata.lastUpdated}
-      />
-
+    <div class="p-4">
       <div
         class="prose dark:prose-invert max-w-none mb-8 lowercase"
         set:html={content}
+      />
+
+      <ScriptMeta
+        slug={script.slug}
+        version={script.metadata.version}
+        lastUpdated={script.metadata.lastUpdated}
       />
     </div>
   </article>

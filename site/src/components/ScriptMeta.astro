@@ -3,20 +3,26 @@ import LinkButton from "./LinkButton.astro";
 
 interface Props {
   slug: string;
+  version: string;
   lastUpdated: Date;
+  details: boolean;
 }
 
-const { slug, lastUpdated } = Astro.props;
+const { slug, lastUpdated, version, details } = Astro.props;
+const gh = "https://github.com/lnus/userscripts/tree/main/"
 ---
 
-<div class="flex justify-between items-center text-sm mb-8">
+<div class="flex justify-between items-end text-sm">
   <div class="text-xs space-y-1">
-    <div>license: mit</div>
+    {version && <div>version: v{version}</div>}
     <div>last updated: {lastUpdated.toLocaleDateString()}</div>
   </div>
 
   <div class="space-x-4">
-    <LinkButton href="https://github.com/lnus/userscripts">source</LinkButton>
+    {details 
+    ? <LinkButton href={`/userscripts/${slug}`}>details</LinkButton>
+    : <LinkButton href={`${gh}/scripts/${slug}`}>source</LinkButton>
+    }
     <LinkButton href={`/userscripts/${slug}/script.user.js`}>install</LinkButton
     >
   </div>

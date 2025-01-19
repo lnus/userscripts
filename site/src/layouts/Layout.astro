@@ -23,6 +23,17 @@ const { title } = Astro.props;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title} | lnus.github.io/userscripts</title>
+
+    <script is:inline>
+    const theme = (() => {
+      if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+        return localStorage.getItem('theme');
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    })();
+
+    if (theme === 'dark') document.documentElement.classList.add('dark');
+    </script>
   </head>
   <body
     class="min-h-screen py-6 font-mono transition-colors duration-200 dark:bg-black dark:text-white bg-white text-black"
@@ -48,23 +59,18 @@ const { title } = Astro.props;
 </html>
 
 <script>
-  const themeToggle = document.getElementById("theme-toggle");
-  const html = document.documentElement;
-
-  const theme = localStorage.getItem("theme") || "dark";
-  html.classList.toggle("dark", theme === "dark");
-
-  themeToggle?.addEventListener("click", () => {
-    html.classList.toggle("dark");
-    localStorage.setItem(
-      "theme",
-      html.classList.contains("dark") ? "dark" : "light"
-    );
-  });
+const themeToggle = document.getElementById("theme-toggle");
+themeToggle?.addEventListener("click", () => {
+  document.documentElement.classList.toggle("dark");
+  localStorage.setItem(
+    "theme",
+    document.documentElement.classList.contains("dark") ? "dark" : "light"
+  );
+});
 </script>
 
 <style is:global>
-  :root {
-    font-family: "IBM Plex Mono", monospace;
-  }
+:root {
+font-family: "IBM Plex Mono", monospace;
+}
 </style>

@@ -3,6 +3,7 @@ import { marked } from "marked";
 import LinkButton from "./LinkButton.astro";
 import ScriptHeader from "./ScriptHeader.astro";
 import ScriptMeta from "./ScriptMeta.astro";
+import AsciiBox from "./AsciiBox.astro";
 
 interface Props {
   title: string;
@@ -23,14 +24,14 @@ const { title, description, slug, metadata, content } = Astro.props;
 const contentHtml = await marked(content);
 ---
 
-<article class="border-2 border-current p-4 transition-colors">
+<!-- <article class="border-dashed border-2 p-4 border-current transition-colors"> -->
+<article class="border-b border-black/20 dark:border-white/20 p-4 transition-colors">
   <ScriptHeader
     title={title}
     version={metadata.version}
     author={metadata.author}
     description={metadata.description}
   />
-
 
   <ScriptMeta
     slug={slug}

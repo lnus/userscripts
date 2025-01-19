@@ -1,6 +1,9 @@
 ---
 import Button from "../components/Button.astro";
 import LinkButton from "../components/LinkButton.astro";
+import Box from "../components/Box.astro";
+import figlet from 'figlet';
+
 interface Props {
   title: string;
 }
@@ -20,7 +23,14 @@ const { title } = Astro.props;
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap"
       rel="stylesheet"
     />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- favicon and icons -->
+    <link rel="icon" href="/userscripts/favicon.ico" sizes="any">
+    <link rel="icon" href="/userscripts/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="icon" href="/userscripts/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="/userscripts/apple-touch-icon.png">
+    <link rel="manifest" href="/userscripts/site.webmanifest">
+
     <meta name="generator" content={Astro.generator} />
     <title>{title} | lnus.github.io/userscripts</title>
 
@@ -35,23 +45,27 @@ const { title } = Astro.props;
     if (theme === 'dark') document.documentElement.classList.add('dark');
     </script>
   </head>
-  <body
-    class="min-h-screen py-6 font-mono transition-colors duration-200 dark:bg-black dark:text-white bg-white text-black"
-  >
-    <main class="max-w-4xl mx-auto px-4 py-8">
-      <div class="border-2 border-current p-8">
+  <body class="min-h-screen py-6 font-mono transition-colors dark:bg-black dark:text-white bg-white text-black">
+    <main class="container mx-auto px-4 max-w-6xl">
+      <Box class="border-b mb-8">
         <div class="flex justify-between items-center">
           <a href="/userscripts">
-            <h1 class="text-4xl lowercase tracking-tight">{title}</h1>
+            <h1 class="
+              text-4xl lowercase tracking-tight
+              hover:text-white dark:hover:text-black
+              hover:bg-black dark:hover:bg-white
+              transition-colors">
+              userscripts
+            </h1>
           </a>
           <div class="flex items-center space-x-4">
-            <LinkButton href="/userscripts">home</LinkButton>
+            <!-- <LinkButton href="/userscripts">home</LinkButton> -->
             <Button id="theme-toggle">toggle theme</Button>
           </div>
         </div>
-      </div>
+      </Box>
 
-      <div class="mt-8">
+      <div>
         <slot />
       </div>
     </main>

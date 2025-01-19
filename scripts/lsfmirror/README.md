@@ -1,22 +1,17 @@
 # LSF Mirror Player
 
-A userscript that makes watching LivestreamFail clips less sucky.
+## Installation
+
+1. Install a userscript manager like Violentmonkey for your browser
+2. Install this script from the [scripts page](https://lnus.github.io/userscripts/lsfmirror).
 
 ## Features
 
 - Adds a "📺 mirror" button to every post on r/LivestreamFail
 - Creates a floating video player that you can drag around your screen
-- Automatically fetches mirror links from LSFSecondaryMirror bot
 - Resizable player window
 - Full video controls
-- Minimize/maximize the player
-- Easy close button when you're done watching
 
-## Installation
-
-1. Install a userscript manager like Violentmonkey for your browser
-2. Install this script from the [scripts page.](https://lnus.github.io/userscripts/scripts/lsfmirror/script.user.js)
-3. Visit r/LivestreamFail
 
 ## How to Use
 

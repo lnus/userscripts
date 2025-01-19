@@ -1,23 +1,35 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import ScriptCard from "../components/ScriptCard.astro";
+import Box from "../components/Box.astro";
+
 import { getAllScripts } from "../utils/scripts";
 
 const scripts = await getAllScripts();
 ---
 
-<Layout title="Userscripts">
-  <div class="flex flex-col gap-4">
-    {
-      scripts.map((script) => (
-        <ScriptCard
-          title={script.title}
-          description={script.description}
-          content={script.content}
-          slug={script.slug}
-          metadata={script.metadata}
-        />
-      ))
-    }
+<Layout title="userscripts">
+  <div class="flex gap-8">
+    <!-- main content (80%) -->
+    <div class="flex-grow">
+      <Box title="collection" subtitle="stuff i made">
+        <div class="flex flex-col gap-4">
+          {scripts.map((script) => (
+          <ScriptCard {...script} />
+          ))}
+        </div>
+      </Box>
+    </div>
+
+    <!-- sidebar (20%) -->
+    <div class="w-80">
+      <Box title="about" subtitle="what's this?" class="sticky top-4">
+        <div class="space-y-4 text-sm">
+          <p>hey! (◕‿◕✿)</p>
+          <p>this is my small collection of userscripts that make my web browsing better</p>
+          <p>feel free to browse around and maybe find something useful!</p>
+        </div>
+      </Box>
+    </div>
   </div>
 </Layout>

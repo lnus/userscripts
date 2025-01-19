@@ -1,7 +1,10 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import LinkButton from "../../components/LinkButton.astro";
 import ScriptHeader from "../../components/ScriptHeader.astro";
 import ScriptMeta from "../../components/ScriptMeta.astro";
+import Box from "../../components/Box.astro";
+
 import { getAllScripts, getScriptBySlug } from "../../utils/scripts";
 import { marked } from "marked";
 
@@ -20,21 +23,37 @@ if (!script) {
 }
 
 const content = await marked(script.content);
+const gh = "https://github.com/lnus/userscripts/tree/main/"
 ---
 
 <Layout title={script.slug}>
-  <article class="border-2 border-current">
-    <div class="p-4">
-      <div
-        class="prose dark:prose-invert max-w-none mb-8 lowercase"
-        set:html={content}
-      />
-
-      <ScriptMeta
-        slug={script.slug}
-        version={script.metadata.version}
-        lastUpdated={script.metadata.lastUpdated}
-      />
+  <div class="flex gap-8">
+    <div class="flex-grow">
+      <Box title={script.slug} subtitle="README.md">
+        <div
+          class="prose p-4 dark:prose-invert lowercase"
+          set:html={content}
+        />
+      </Box>
     </div>
-  </article>
+
+    <div class="w-80">
+      <Box title="info" subtitle="meta tags" class="sticky top-4">
+        <div class="space-y-4 text-sm">
+          <div>name: {script.metadata.name}</div>
+          <div>author: {script.metadata.author}</div>
+          <div>description: {script.metadata.description}</div>
+          <div>license: mit</div>
+          <div>version: v{script.metadata.version}</div>
+          <div>last updated: {script.metadata.lastUpdated.toLocaleDateString()}</div>
+          <div class="flex justify-end gap-4">
+            <LinkButton href={`${gh}/scripts/${slug}`}>source</LinkButton>
+            <LinkButton href={`/userscripts/${slug}/script.user.js`}>install</LinkButton
+            >
+          </div>
+        </div>
+      </Box>
+    </div>
+  </div>
 </Layout>
+

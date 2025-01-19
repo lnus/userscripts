@@ -1,8 +1,8 @@
 ---
-import Layout from "../layouts/Layout.astro";
 import ScriptCard from "../components/ScriptCard.astro";
 import Box from "../components/Box.astro";
 import SearchBar from "../components/SearchBar.astro";
+import Layout from "../layouts/Layout.astro";
 
 import { getAllScripts } from "../utils/scripts";
 
@@ -16,9 +16,7 @@ const scripts = await getAllScripts();
       <Box title="collection" subtitle="stuff i made">
         <SearchBar />
         <div class="flex flex-col gap-4">
-          {scripts.map((script) => (
-          <ScriptCard {...script} />
-          ))}
+          {scripts.map((script) => <ScriptCard {...script} />)}
         </div>
       </Box>
     </div>
@@ -28,7 +26,10 @@ const scripts = await getAllScripts();
       <Box title="about" subtitle="what's this?" class="sticky top-8">
         <div class="space-y-4 text-sm">
           <p>hey! (◕‿◕✿)</p>
-          <p>this is my small collection of userscripts that make my web browsing better</p>
+          <p>
+            this is my small collection of userscripts that make my web browsing
+            better
+          </p>
           <p>feel free to browse around and maybe find something useful!</p>
         </div>
       </Box>

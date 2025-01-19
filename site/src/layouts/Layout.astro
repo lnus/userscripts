@@ -1,8 +1,6 @@
 ---
 import Button from "../components/Button.astro";
-import LinkButton from "../components/LinkButton.astro";
 import Box from "../components/Box.astro";
-import figlet from 'figlet';
 
 interface Props {
   title: string;
@@ -25,36 +23,54 @@ const { title } = Astro.props;
     />
 
     <!-- favicon and icons -->
-    <link rel="icon" href="/userscripts/favicon.ico" sizes="any">
-    <link rel="icon" href="/userscripts/favicon-16x16.png" sizes="16x16" type="image/png">
-    <link rel="icon" href="/userscripts/favicon-32x32.png" sizes="32x32" type="image/png">
-    <link rel="apple-touch-icon" href="/userscripts/apple-touch-icon.png">
-    <link rel="manifest" href="/userscripts/site.webmanifest">
+    <link rel="icon" href="/userscripts/favicon.ico" sizes="any" />
+    <link
+      rel="icon"
+      href="/userscripts/favicon-16x16.png"
+      sizes="16x16"
+      type="image/png"
+    />
+    <link
+      rel="icon"
+      href="/userscripts/favicon-32x32.png"
+      sizes="32x32"
+      type="image/png"
+    />
+    <link rel="apple-touch-icon" href="/userscripts/apple-touch-icon.png" />
+    <link rel="manifest" href="/userscripts/site.webmanifest" />
 
     <meta name="generator" content={Astro.generator} />
     <title>{title} | lnus.github.io/userscripts</title>
 
     <script is:inline>
-    const theme = (() => {
-      if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-        return localStorage.getItem('theme');
-      }
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    })();
+      const theme = (() => {
+        if (
+          typeof localStorage !== "undefined" &&
+          localStorage.getItem("theme")
+        ) {
+          return localStorage.getItem("theme");
+        }
+        return window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+      })();
 
-    if (theme === 'dark') document.documentElement.classList.add('dark');
+      if (theme === "dark") document.documentElement.classList.add("dark");
     </script>
   </head>
-  <body class="min-h-screen py-6 font-mono transition-colors dark:bg-black dark:text-white bg-white text-black">
+  <body
+    class="min-h-screen py-6 font-mono transition-colors dark:bg-black dark:text-white bg-white text-black"
+  >
     <main class="container mx-auto px-4 max-w-6xl">
       <Box class="border-b mb-8">
         <div class="flex justify-between items-center">
           <a href="/userscripts">
-            <h1 class="
-              text-4xl lowercase tracking-tight
+            <h1
+              class="text-4xl lowercase tracking-tight
               hover:text-white dark:hover:text-black
               hover:bg-black dark:hover:bg-white
-              transition-colors">
+              transition-colors"
+            >
               userscripts
             </h1>
           </a>
@@ -73,18 +89,18 @@ const { title } = Astro.props;
 </html>
 
 <script>
-const themeToggle = document.getElementById("theme-toggle");
-themeToggle?.addEventListener("click", () => {
-  document.documentElement.classList.toggle("dark");
-  localStorage.setItem(
-    "theme",
-    document.documentElement.classList.contains("dark") ? "dark" : "light"
-  );
-});
+  const themeToggle = document.getElementById("theme-toggle");
+  themeToggle?.addEventListener("click", () => {
+    document.documentElement.classList.toggle("dark");
+    localStorage.setItem(
+      "theme",
+      document.documentElement.classList.contains("dark") ? "dark" : "light",
+    );
+  });
 </script>
 
 <style is:global>
-:root {
-font-family: "IBM Plex Mono", monospace;
-}
+  :root {
+    font-family: "IBM Plex Mono", monospace;
+  }
 </style>

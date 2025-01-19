@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { slug, lastUpdated, version, details } = Astro.props;
-const gh = "https://github.com/lnus/userscripts/tree/main/"
+const gh = "https://github.com/lnus/userscripts/tree/main/";
 ---
 
 <div class="flex justify-between items-end text-sm">
@@ -19,9 +19,12 @@ const gh = "https://github.com/lnus/userscripts/tree/main/"
   </div>
 
   <div class="space-x-4">
-    {details 
-    ? <LinkButton href={`/userscripts/${slug}`}>details</LinkButton>
-    : <LinkButton href={`${gh}/scripts/${slug}`}>source</LinkButton>
+    {
+      details ? (
+        <LinkButton href={`/userscripts/${slug}`}>details</LinkButton>
+      ) : (
+        <LinkButton href={`${gh}/scripts/${slug}`}>source</LinkButton>
+      )
     }
     <LinkButton href={`/userscripts/${slug}/script.user.js`}>install</LinkButton
     >

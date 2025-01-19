@@ -8,15 +8,18 @@ interface Props {
 const { title, subtitle, class: className } = Astro.props;
 ---
 
-<div class:list={[
-  "p-4",
-  className
-]}>
-  {title && (
-  <div class="flex items-center gap-2 mb-4">
-    <span class="whitespace-nowrap">╭─ {title} ─╮</span>
-    {subtitle && <span class="text-xs text-neutral-600 dark:text-neutral-400">({subtitle})</span>}
-  </div>
-  )}
+<div class:list={["p-4", className]}>
+  {
+    title && (
+      <div class="flex items-center gap-2 mb-4">
+        <span class="whitespace-nowrap">╭─ {title} ─╮</span>
+        {subtitle && (
+          <span class="text-xs text-neutral-600 dark:text-neutral-400">
+            ({subtitle})
+          </span>
+        )}
+      </div>
+    )
+  }
   <slot />
 </div>

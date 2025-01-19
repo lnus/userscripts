@@ -30,7 +30,7 @@ function parseUserscriptMetadata(content: string): ScriptMetadata {
 
   const rawMetadata: Record<string, string> = {};
 
-  match[1].split("\n").forEach(line => {
+  match[1].split("\n").forEach((line) => {
     const match = line.match(/\/\/ @(\w+)\s+(.+)/);
     if (match) {
       const [, key, value] = match;
@@ -46,7 +46,7 @@ function parseUserscriptMetadata(content: string): ScriptMetadata {
     lastUpdated: rawMetadata.lastModified
       ? new Date(rawMetadata.lastModified)
       : new Date(),
-    tags: rawMetadata.tags?.split(',').map(tag => tag.trim()) || []
+    tags: rawMetadata.tags?.split(",").map((tag) => tag.trim()) || [],
   };
 }
 
@@ -70,7 +70,7 @@ export async function getAllScripts(): Promise<Script[]> {
         // Read userscript file
         const scriptFiles = await fs.readdir(folderPath);
         const userscriptFile = scriptFiles.find((file) =>
-          file.endsWith(".user.js")
+          file.endsWith(".user.js"),
         );
         if (!userscriptFile) throw new Error("No userscript found");
 
@@ -93,7 +93,7 @@ export async function getAllScripts(): Promise<Script[]> {
         console.error(`Error processing script ${folder}:`, error);
         return null;
       }
-    })
+    }),
   );
 
   return scripts.filter((script): script is Script => script !== null);

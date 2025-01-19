@@ -1,8 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import LinkButton from "../../components/LinkButton.astro";
-import ScriptHeader from "../../components/ScriptHeader.astro";
-import ScriptMeta from "../../components/ScriptMeta.astro";
 import Box from "../../components/Box.astro";
 import Tag from "../../components/Tag.astro";
 
@@ -24,17 +22,14 @@ if (!script) {
 }
 
 const content = await marked(script.content);
-const gh = "https://github.com/lnus/userscripts/tree/main/"
+const gh = "https://github.com/lnus/userscripts/tree/main/";
 ---
 
 <Layout title={script.slug}>
   <div class="flex gap-8">
     <div class="flex-grow">
       <Box title={script.slug} subtitle="README.md">
-        <div
-          class="prose p-4 dark:prose-invert lowercase"
-          set:html={content}
-        />
+        <div class="prose p-4 dark:prose-invert lowercase" set:html={content} />
       </Box>
     </div>
 
@@ -46,17 +41,24 @@ const gh = "https://github.com/lnus/userscripts/tree/main/"
           <div>description: {script.metadata.description}</div>
           <div>license: mit</div>
           <div>version: v{script.metadata.version}</div>
-          <div>last updated: {script.metadata.lastUpdated.toLocaleDateString()}</div>
-
-          {script.metadata.tags.length > 0 && (
-          <div class="flex gap-2 my-4 flex-wrap">
-            {script.metadata.tags.map(tag => <Tag name={tag} />)}
+          <div>
+            last updated: {script.metadata.lastUpdated.toLocaleDateString()}
           </div>
-          )}
+
+          {
+            script.metadata.tags.length > 0 && (
+              <div class="flex gap-2 my-4 flex-wrap">
+                {script.metadata.tags.map((tag) => (
+                  <Tag name={tag} />
+                ))}
+              </div>
+            )
+          }
 
           <div class="flex justify-end gap-4">
             <LinkButton href={`${gh}/scripts/${slug}`}>source</LinkButton>
-            <LinkButton href={`/userscripts/${slug}/script.user.js`}>install</LinkButton
+            <LinkButton href={`/userscripts/${slug}/script.user.js`}
+              >install</LinkButton
             >
           </div>
         </div>
@@ -64,4 +66,3 @@ const gh = "https://github.com/lnus/userscripts/tree/main/"
     </div>
   </div>
 </Layout>
-

@@ -6,7 +6,7 @@ interface Props {
   description: string;
 }
 
-const { title, version, author, description } = Astro.props;
+const { title, version, description } = Astro.props;
 ---
 
 <header>
@@ -20,7 +20,4 @@ const { title, version, author, description } = Astro.props;
   <p class="text-sm mb-4 line-clamp-2 text-gray-600 dark:text-gray-300">
     {description}
   </p>
-
-  <!-- Don't really need author, all of the scripts are by me -->
-  <!-- <div class="text-sm">{author}</div> -->
 </header>

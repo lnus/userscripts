@@ -8,6 +8,7 @@ interface ScriptMetadata {
   description: string;
   author: string;
   lastUpdated: Date;
+  tags: string[];
 }
 
 export interface Script {
@@ -27,23 +28,25 @@ function parseUserscriptMetadata(content: string): ScriptMetadata {
     throw new Error("No userscript metadata found");
   }
 
-  const metadata = match[1].split("\n").reduce((acc, line) => {
+  const rawMetadata: Record<string, string> = {};
+
+  match[1].split("\n").forEach(line => {
     const match = line.match(/\/\/ @(\w+)\s+(.+)/);
     if (match) {
       const [, key, value] = match;
-      acc[key] = value.trim();
+      rawMetadata[key] = value.trim();
     }
-    return acc;
-  }, {} as Record<string, string>);
+  });
 
   return {
-    name: metadata.name || "Unnamed Script",
-    version: metadata.version || "0.0.0",
-    description: metadata.description || "No description provided",
-    author: metadata.author || "Unknown",
-    lastUpdated: metadata.lastModified
-      ? new Date(metadata.lastModified)
-      : new Date(), // fallback
+    name: rawMetadata.name || "unnamed script",
+    version: rawMetadata.version || "0.0.0",
+    description: rawMetadata.description || "no description provided",
+    author: rawMetadata.author || "unknown",
+    lastUpdated: rawMetadata.lastModified
+      ? new Date(rawMetadata.lastModified)
+      : new Date(),
+    tags: rawMetadata.tags?.split(',').map(tag => tag.trim()) || []
   };
 }
 

@@ -4,6 +4,7 @@ import LinkButton from "./LinkButton.astro";
 import ScriptHeader from "./ScriptHeader.astro";
 import ScriptMeta from "./ScriptMeta.astro";
 import AsciiBox from "./AsciiBox.astro";
+import Tag from "./Tag.astro";
 
 interface Props {
   title: string;
@@ -16,6 +17,7 @@ interface Props {
     description: string;
     author: string;
     lastUpdated: Date;
+    tags: string[];
   };
 }
 
@@ -32,6 +34,12 @@ const contentHtml = await marked(content);
     author={metadata.author}
     description={metadata.description}
   />
+
+  {metadata.tags.length > 0 && (
+  <div class="flex gap-2 my-4 flex-wrap">
+    {metadata.tags.map(tag => <Tag name={tag} />)}
+  </div>
+  )}
 
   <ScriptMeta
     slug={slug}

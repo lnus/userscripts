@@ -7,6 +7,7 @@
 // @author      lnus
 // @version     0.1.1
 // @lastModified 2025-01-17
+// @tags video, reddit, livestreamfail, player
 // ==/UserScript==
 (function () {
   "use strict";

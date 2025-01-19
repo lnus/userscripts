@@ -4,6 +4,7 @@ import LinkButton from "../../components/LinkButton.astro";
 import ScriptHeader from "../../components/ScriptHeader.astro";
 import ScriptMeta from "../../components/ScriptMeta.astro";
 import Box from "../../components/Box.astro";
+import Tag from "../../components/Tag.astro";
 
 import { getAllScripts, getScriptBySlug } from "../../utils/scripts";
 import { marked } from "marked";
@@ -38,7 +39,7 @@ const gh = "https://github.com/lnus/userscripts/tree/main/"
     </div>
 
     <div class="w-80">
-      <Box title="info" subtitle="meta tags" class="sticky top-4">
+      <Box title="info" subtitle="meta tags" class="sticky top-8">
         <div class="space-y-4 text-sm">
           <div>name: {script.metadata.name}</div>
           <div>author: {script.metadata.author}</div>
@@ -46,6 +47,13 @@ const gh = "https://github.com/lnus/userscripts/tree/main/"
           <div>license: mit</div>
           <div>version: v{script.metadata.version}</div>
           <div>last updated: {script.metadata.lastUpdated.toLocaleDateString()}</div>
+
+          {script.metadata.tags.length > 0 && (
+          <div class="flex gap-2 my-4 flex-wrap">
+            {script.metadata.tags.map(tag => <Tag name={tag} />)}
+          </div>
+          )}
+
           <div class="flex justify-end gap-4">
             <LinkButton href={`${gh}/scripts/${slug}`}>source</LinkButton>
             <LinkButton href={`/userscripts/${slug}/script.user.js`}>install</LinkButton

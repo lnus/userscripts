@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import ScriptCard from "../components/ScriptCard.astro";
 import Box from "../components/Box.astro";
+import SearchBar from "../components/SearchBar.astro";
 
 import { getAllScripts } from "../utils/scripts";
 
@@ -13,6 +14,7 @@ const scripts = await getAllScripts();
     <!-- main content (80%) -->
     <div class="flex-grow">
       <Box title="collection" subtitle="stuff i made">
+        <SearchBar />
         <div class="flex flex-col gap-4">
           {scripts.map((script) => (
           <ScriptCard {...script} />

@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import matter from "gray-matter";
+import { execSync } from "child_process";
 
 interface ScriptMetadata {
   name: string;
@@ -45,6 +46,21 @@ function parseUserscriptMetadata(content: string): ScriptMetadata {
   };
 }
 
+async function getLastCommitDate(filePath: string): Promise<Date> {
+  try {
+    const timestamp = execSync(
+      `git log -1 --format=%ct "${filePath}"`,
+      { encoding: 'utf-8' }
+    ).trim();
+    return new Date(parseInt(timestamp) * 1000)
+  } catch (error) {
+    console.error(`git date fetch failed for ${filePath}:`, error);
+    return new Date(); // fallback to current time
+
+    // return new Date('2000-01-01'); // FIXME: just for debug
+  }
+}
+
 export async function getAllScripts(): Promise<Script[]> {
   const scriptsDir = path.join(process.cwd(), "..", "scripts");
   const scriptFolders = await fs.readdir(scriptsDir);
@@ -71,10 +87,9 @@ export async function getAllScripts(): Promise<Script[]> {
 
         const scriptPath = path.join(folderPath, userscriptFile);
         const scriptContent = await fs.readFile(scriptPath, "utf-8");
-        const scriptStat = await fs.stat(scriptPath);
         const metadata = {
           ...parseUserscriptMetadata(scriptContent),
-          lastUpdated: scriptStat.mtime,
+          lastUpdated: await getLastCommitDate(scriptPath),
         };
 
         return {
